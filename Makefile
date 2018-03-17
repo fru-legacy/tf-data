@@ -3,9 +3,8 @@ publish:
 	twine upload dist/*
 
 tag:
-	git tag 0.0.3 -m "0.0.3"
+	git tag 0.0.4 -m "0.0.4"
 	git push --tags origin master
-	make cleanup
 
 cleanup:
 	rm -rf dist

@@ -1,6 +1,6 @@
-import drive
+import tf_data.drive
 import os
-from LabeledImageDataset import LabeledImageDataset
+from tf_data.LabeledImageDataset import LabeledImageDataset
 
 
 def mnist(path, file='mnist.npz'):

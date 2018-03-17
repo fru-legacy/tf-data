@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-from ImagePatches import ImagePatches
+from tf_data.ImagePatches import ImagePatches
 
 
 class LabeledImagePlaceholder:
