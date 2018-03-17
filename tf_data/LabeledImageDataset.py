@@ -3,7 +3,7 @@ import numpy as np
 
 
 class LabeledImagePlaceholder:
-    def __init__(self, info):
+    def __init__(self, info, patches=[4, 4], ):
         self.info = info
         self._position = 0
 

@@ -3,7 +3,7 @@ import numpy as np
 import shutil
 
 np.random.seed(0)
-ROOT_FOLDER = '/data/tf-data'
+ROOT_FOLDER = '/data/tf_data'
 
 
 def shuffle(prefix, data):

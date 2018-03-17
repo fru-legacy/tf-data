@@ -13,6 +13,6 @@ def fashion_mnist(path, file='fashion-mnist.npz'):
     return LabeledImageDataset(28, 28, 1, 10, os.path.join(path, file), lambda x: x / 255.0)
 
 # Usage example:
-# data = fashion_mnist('/data/tf-data').placeholder()
+# data = fashion_mnist('/data/tf_data').placeholder()
 # print(data.test(splits=2)[0][data.image_flat].shape)
 # print(data.train()[data.image_flat].shape)
