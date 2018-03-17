@@ -1,9 +1,10 @@
 import tensorflow as tf
 import numpy as np
+from ImagePatches import ImagePatches
 
 
 class LabeledImagePlaceholder:
-    def __init__(self, info, patches=[4, 4], ):
+    def __init__(self, info, patch_size=None):
         self.info = info
         self._position = 0
 
@@ -11,6 +12,9 @@ class LabeledImagePlaceholder:
         self.label = tf.placeholder(tf.int32, [None, 1])
         self.image = tf.reshape(self.image_flat, [-1] + self.info.dim_image)
         self.label_one_hot = tf.one_hot(self.label, self.info.label_count)
+
+        if patch_size:
+            self.patches = ImagePatches(self.image, patch_size, self.info.color_channels)
 
     def train(self, batch_size=40):
         p = self._position

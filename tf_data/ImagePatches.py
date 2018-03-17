@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 
-def split_into_patches(images, patch_size=[2, 2], channels=1, reversible=False):
+def _split_into_patches(images, patch_size, channels, reversible=False):
     kernel = [1] + patch_size + [1]
     stride = kernel if reversible else [1, 1, 1, 1]
     result = tf.extract_image_patches(images, kernel, strides=stride, rates=[1, 1, 1, 1], padding='VALID')
@@ -13,7 +13,7 @@ def split_into_patches(images, patch_size=[2, 2], channels=1, reversible=False):
     return tf.reshape(result, [-1, size]), size, count
 
 
-def join_patches(patches, original_size, patch_size=[2, 2], channels=1):
+def _join_patches(patches, original_size, patch_size, channels):
 
     def implementation(patches_numpy):
         patch_fragments = np.reshape(patches_numpy, [-1, patch_size[1] * channels])
@@ -31,3 +31,23 @@ def join_patches(patches, original_size, patch_size=[2, 2], channels=1):
 
     result = tf.py_func(implementation, [patches], patches.dtype)
     return tf.reshape(result, shape=[-1] + original_size + [channels])
+
+
+def _compute_patch_size_factors(patch_size):
+    patch_sum = np.prod(patch_size)
+    return [x for x in range(patch_sum) if patch_sum % x == 0]
+
+
+class ImagePatches:
+    def __init__(self, data, patch_size):
+        self.patch_size = patch_size
+        self.image_size = [data.info.height, data.info.width]
+
+        reversible = _split_into_patches(data.image, patch_size, data.info.color_channels, reversible=True)
+        self.reversible, self.patches_size, self.reversible_count = reversible
+        self.all = self.reversible  # Add non reversible slices to patches_extended
+
+    def restored_image_summary(self, name, generated, max_outputs=3):
+        # Use tf.slice to only extract reversible_count reversible slices
+        restored = _join_patches(generated, self.image_size, self.patch_size, self.data.channels)
+        return tf.summary.image(name, restored, max_outputs)

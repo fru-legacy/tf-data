@@ -6,7 +6,7 @@ from tf_data import ImagePatches
 
 
 def _get_index_shape(shape):
-    return tf.reshape(list(range(np.prod(shape))), shape)
+    return tf.reshape(list(range(int(np.prod(shape)))), shape)
 
 
 class _Tests(tf.test.TestCase):
@@ -14,8 +14,8 @@ class _Tests(tf.test.TestCase):
     def _testIfPatchIsReversible(self, patch_count, patch_size, channels):
         original_size = np.multiply(patch_count, patch_size).tolist()
         indexes = tf.tile(_get_index_shape([1] + original_size + [1]), [1, 1, 1, channels])
-        patches, _, _ = ImagePatches.split_into_patches(indexes, reversible=True, patch_size=patch_size, channels=channels)
-        joined = ImagePatches.join_patches(patches, original_size, patch_size=patch_size, channels=channels)
+        patches, _, _ = ImagePatches._split_into_patches(indexes, reversible=True, patch_size=patch_size, channels=channels)
+        joined = ImagePatches._join_patches(patches, original_size, patch_size=patch_size, channels=channels)
 
         with tf.Session() as session:
             print(joined.eval())
