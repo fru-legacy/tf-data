@@ -9,10 +9,10 @@ class LabeledImagePlaceholder:
         self._position = 0
 
         self.image_flat = tf.placeholder(tf.float32, [None, np.prod(self.info.dim_image)])
-        self.label = tf.placeholder(tf.int32, [None, 1])
+        self.label = tf.placeholder(tf.int32, [None])
         self.image = tf.reshape(self.image_flat, [-1] + self.info.dim_image)
         self.label_one_hot = tf.one_hot(self.label, self.info.label_count)
-        self.patches = lambda patch_size: ImagePatches(self.image, patch_size, self.info.width, self.info.height, self.info.color_channels)
+        self.patches = ImagePatches.build(self.image, self.info.width, self.info.height, self.info.color_channels)
 
     def train(self, batch_size=40):
         p = self._position

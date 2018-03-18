@@ -33,12 +33,12 @@ def _join_patches(patches, original_size, patch_dim, channels):
 
 def _integrate_patches_in_batch(data):
     assert len(data.get_shape()) == 3
-    return tf.reshape(data, [-1, tf.shape(data)[-1]])
+    return tf.reshape(data, [-1, int(data.get_shape()[-1])])
 
 
 def _extract_patches_from_batch(data, all_count):
     assert len(data.get_shape()) == 2
-    return tf.reshape(data, [-1, all_count, tf.shape(data)[-1]])
+    return tf.reshape(data, [-1, all_count, int(data.get_shape()[-1])])
 
 
 def _compute_patch_size_factors(patch_size):
@@ -47,7 +47,13 @@ def _compute_patch_size_factors(patch_size):
 
 
 class ImagePatches:
-    def __init__(self, image, patch_dim, width, height, color_channels):
+    @staticmethod
+    def build(image, width, height, color_channels):
+        def builder(patch_dim, auxiliary_max_count=None):
+            return ImagePatches(image, width, height, color_channels, patch_dim, auxiliary_max_count)
+        return builder
+
+    def __init__(self, image, width, height, color_channels, patch_dim, auxiliary_max_count):
         self._patch_dim = patch_dim
         self._image_size = [height, width]
         self._color_channels = color_channels
@@ -55,9 +61,15 @@ class ImagePatches:
         reversible, self._reversible_count = _split_into_patches(image, patch_dim, reversible=True)
         auxiliary, auxiliary_count = _split_into_patches(image, patch_dim, reversible=False)
 
-        self.count = self._reversible_count + auxiliary_count
+        if auxiliary_max_count and auxiliary_max_count < auxiliary_count:
+            all_indices = tf.random_shuffle(list(range(auxiliary_count)))
+            indices = tf.slice(all_indices, [0], [auxiliary_max_count])
+            auxiliary_count = auxiliary_max_count
+            auxiliary = tf.gather(auxiliary, indices, axis=1)
+
+        self.count = int(self._reversible_count + auxiliary_count)
         self.data = _integrate_patches_in_batch(tf.concat([reversible, auxiliary], 1))
-        self.size = np.prod(patch_dim)
+        self.size = int(np.prod(patch_dim))
 
     def restored_image_summary(self, name, generated, max_outputs=3):
         generated = _extract_patches_from_batch(generated, self.count)
