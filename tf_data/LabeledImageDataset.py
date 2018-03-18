@@ -4,7 +4,7 @@ from tf_data.ImagePatches import ImagePatches
 
 
 class LabeledImagePlaceholder:
-    def __init__(self, info, patch_size=None):
+    def __init__(self, info):
         self.info = info
         self._position = 0
 
@@ -12,9 +12,7 @@ class LabeledImagePlaceholder:
         self.label = tf.placeholder(tf.int32, [None, 1])
         self.image = tf.reshape(self.image_flat, [-1] + self.info.dim_image)
         self.label_one_hot = tf.one_hot(self.label, self.info.label_count)
-
-        if patch_size:
-            self.patches = ImagePatches(self.image, patch_size, self.info.color_channels)
+        self.patches = lambda patch_size: ImagePatches(self.image, patch_size, self.info.width, self.info.height, self.info.color_channels)
 
     def train(self, batch_size=40):
         p = self._position
