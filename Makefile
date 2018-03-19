@@ -1,6 +1,7 @@
 publish:
 	python3 setup.py sdist
 	twine upload dist/*
+	make cleanup
 
 tag:
 	git tag 0.0.4 -m "0.0.4"
