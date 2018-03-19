@@ -36,9 +36,9 @@ def _integrate_patches_in_batch(data):
     return tf.reshape(data, [-1, int(data.get_shape()[-1])])
 
 
-def _extract_patches_from_batch(data, all_count):
+def _extract_patches_from_batch(data, total_batch_count):
     assert len(data.get_shape()) == 2
-    return tf.reshape(data, [-1, all_count, int(data.get_shape()[-1])])
+    return tf.reshape(data, [-1, total_batch_count, int(data.get_shape()[-1])])
 
 
 def _compute_patch_size_factors(patch_size):
@@ -77,3 +77,6 @@ class ImagePatches:
         generated = tf.slice(generated, [0, 0, 0], [-1, self._reversible_count, -1])
         restored = _join_patches(generated, self._image_size, self._patch_dim, self._color_channels)
         return tf.summary.image(name, restored, max_outputs)
+
+    def extract_patches_from_batch(self, generated):
+        return _extract_patches_from_batch(generated, self.count)
