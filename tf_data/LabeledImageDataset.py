@@ -7,7 +7,7 @@ class LabeledImagePlaceholder:
     def __init__(self, info):
         self.info = info
         self._position = 0
-
+        self.train_size = self.info.raw_data['train_data'].shape[0]
         self.image_flat = tf.placeholder(tf.float32, [None, np.prod(self.info.dim_image)])
         self.label = tf.placeholder(tf.int32, [None])
         self.image = tf.reshape(self.image_flat, [-1] + self.info.dim_image)
@@ -15,11 +15,15 @@ class LabeledImagePlaceholder:
         self.patches = ImagePatches.build(self.image, self.info.width, self.info.height, self.info.color_channels)
 
     def train(self, batch_size=40):
-        p = self._position
-        self._position += batch_size
+        start = self._position % self.train_size
+        end = (self._position + batch_size) % self.train_size
+        self._position = end
 
-        labels = self.info.raw_data['train_labels'][p:p + batch_size]
-        images = self.info.raw_data['train_data'][p:p + batch_size]
+        def slice_with_range_restart(value):
+            return value[start:end] if end > start else np.concatenate((value[start:], value[:end]))
+
+        labels = slice_with_range_restart(self.info.raw_data['train_labels'])
+        images = slice_with_range_restart(self.info.raw_data['train_data'])
         images = np.reshape(images, (-1, np.prod(self.info.dim_image)))
 
         return {self.image_flat: self.info.map_data(images), self.label: self.info.map_labels(labels)}
