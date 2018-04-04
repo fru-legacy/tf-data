@@ -61,7 +61,7 @@ class ImagePatches:
         reversible, self._reversible_count = _split_into_patches(image, patch_dim, reversible=True)
         auxiliary, auxiliary_count = _split_into_patches(image, patch_dim, reversible=False)
 
-        if auxiliary_max_count and auxiliary_max_count < auxiliary_count:
+        if auxiliary_max_count is not None and auxiliary_max_count < auxiliary_count:
             all_indices = tf.random_shuffle(list(range(auxiliary_count)))
             indices = tf.slice(all_indices, [0], [auxiliary_max_count])
             auxiliary_count = auxiliary_max_count
